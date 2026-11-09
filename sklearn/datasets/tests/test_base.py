@@ -538,7 +538,7 @@ def test_fetch_file_using_data_home(monkeypatch, tmpdir):
 def test_fetch_file_creates_explicit_folder(monkeypatch, tmp_path, nested):
     server_side = tmp_path / "server"
     server_side.mkdir()
-    server_data = "a,b\\n1,2\\n"
+    server_data = "a,b\n1,2\n"
     (server_side / "data.csv").write_text(server_data, encoding="utf-8")
 
     folder = tmp_path / "downloads"
