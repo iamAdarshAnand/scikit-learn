@@ -533,6 +533,30 @@ def test_fetch_file_using_data_home(monkeypatch, tmpdir):
     assert sorted(local_subfolder.iterdir()) == [local_subfolder / "other_file.txt"]
 
 
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_fetch_file_creates_explicit_folder(monkeypatch, tmp_path, nested):
+    server_side = tmp_path / "server"
+    server_side.mkdir()
+    server_data = "a,b\n1,2\n"
+    (server_side / "data.csv").write_text(server_data, encoding="utf-8")
+
+    folder = tmp_path / "downloads"
+    if nested:
+        folder = folder / "nested"
+    assert not folder.exists()
+
+    urlretrieve_mock = _mock_urlretrieve(server_side)
+    monkeypatch.setattr("sklearn.datasets._base.urlretrieve", urlretrieve_mock)
+
+    fetched_file_path = fetch_file("https://example.com/data.csv", folder=folder)
+
+    assert folder.is_dir()
+    assert fetched_file_path == folder / "data.csv"
+    assert fetched_file_path.read_text(encoding="utf-8") == server_data
+    assert urlretrieve_mock.call_count == 1
+
+
 def test_fetch_file_without_sha256(monkeypatch, tmpdir):
     server_side = tmpdir.mkdir("server_side")
     data_file = Path(server_side / "data.jsonl")
